@@ -6,7 +6,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-type Dex interface {
+type Router interface {
 	Name() string
 	BuildSwapCallData(params SwapParams) ([]byte, error)
 }
@@ -16,6 +16,7 @@ type SwapParams struct {
 	TokenOut  common.Address
 	AmountIn  *big.Int
 	Slippage  float64
+	Fee       *uint32
 	Recipient common.Address
 	Deadline  *big.Int
 }

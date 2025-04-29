@@ -13,6 +13,8 @@ import (
 
 const AbiPath = "uniswapv2/abi/UniswapV2Router.abi.json"
 
+var _ dex.Router = (*UniV2)(nil)
+
 type UniV2 struct {
 	routerAddress common.Address
 	abi           abi.ABI
@@ -40,6 +42,8 @@ func (u *UniV2) Name() string {
 }
 
 func (u *UniV2) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
+	_ = params.Fee
+
 	path := []common.Address{params.TokenIn, params.TokenOut}
 
 	slippageMultiplier := big.NewInt(10000 - int64(params.Slippage*10000))
@@ -47,11 +51,11 @@ func (u *UniV2) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
 	amountOutMin.Div(amountOutMin, big.NewInt(10000))
 
 	input, err := u.abi.Pack("swapExactTokensForTokens",
-		params.AmountIn,  // amountIn
-		amountOutMin,     // amountOutMin
-		path,             // path
-		params.Recipient, // to
-		params.Deadline,  // deadline
+		params.AmountIn,
+		amountOutMin,
+		path,
+		params.Recipient,
+		params.Deadline,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to pack calldata: %w", err)

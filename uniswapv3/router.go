@@ -11,15 +11,17 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
+const abiPath = "uniswapv3/abi/UniswapV3Router.abi.json"
+
+var _ dex.Router = (*UniV3)(nil)
+
 type UniV3 struct {
 	routerAddress common.Address
 	abi           abi.ABI
 }
 
-const AbiPath = "uniswapv3/abi/UniswapV3Router.abi.json"
-
 func New(routerAddress common.Address) *UniV3 {
-	abiData, err := os.ReadFile(AbiPath)
+	abiData, err := os.ReadFile(abiPath)
 	if err != nil {
 		panic(fmt.Errorf("failed to read ABI file: %w", err))
 	}
@@ -40,8 +42,12 @@ func (u *UniV3) Name() string {
 }
 
 func (u *UniV3) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
+	fee := uint32(3000) // default
+	if params.Fee != nil {
+		fee = *params.Fee
+	}
 
-	path := encodePath(params.TokenIn, params.TokenOut, 3000)
+	path := encodePath(params.TokenIn, params.TokenOut, fee)
 
 	payload := map[string]interface{}{
 		"path":             path,

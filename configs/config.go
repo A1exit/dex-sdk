@@ -40,8 +40,12 @@ type Config struct {
 }
 
 var DefaultConfigPath = "configs/config.yaml"
+var cachedConfig *Config
 
 func LoadConfig() (Config, error) {
+	if cachedConfig != nil {
+		return *cachedConfig, nil
+	}
 	data, err := os.ReadFile(DefaultConfigPath)
 	if err != nil {
 		return Config{}, fmt.Errorf("read config yaml: %w", err)

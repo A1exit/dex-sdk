@@ -9,13 +9,13 @@ import (
 	"github.com/A1exit/dex-sdk/uniswapv3"
 )
 
-func GetDex(dexType configs.DexType, net configs.Network) (dex.Dex, error) {
-	networksConfig, err := configs.LoadConfig()
+func GetRouter(dexType configs.DexType, net configs.Network) (dex.Router, error) {
+	config, err := configs.LoadConfig()
 	if err != nil {
-		return nil, fmt.Errorf("load networks config: %w", err)
+		return nil, fmt.Errorf("load config: %w", err)
 	}
 
-	routerAddr, err := networksConfig.GetRouterAddress(net, dexType)
+	routerAddr, err := config.GetRouterAddress(net, dexType)
 	if err != nil {
 		return nil, fmt.Errorf("get router address: %w", err)
 	}
