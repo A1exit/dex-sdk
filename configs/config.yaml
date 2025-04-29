@@ -1,0 +1,33 @@
+networks:
+  sepolia:
+    routers:
+      uniswapv2: "0xeE567Fe1712Faf6149d80dA1E6934E354124CfE3"
+      uniswapv3: "0xeE567Fe1712Faf6149d80dA1E6934E354124CfE3"
+  bsc:
+    routers:
+      uniswapv2: "0x9a489505a00cE272eAa5e07Dba6491314CaE3796"
+      uniswapv3: "0x4752ba5dbc23f44d87826276bf6fd6b1c372ad24"
+  arbitrum:
+    routers:
+      uniswapv2: "0x502c11C15BF18F3CCE7b5df54A8D85DdAAe35e2F"
+      uniswapv3: "0x502c11C15BF18F3CCE7b5df54A8D85DdAAe35e2F"
+
+pairs:
+  sepolia-token1-token2-v2:
+    dex: uniswapv2
+    network: sepolia
+    token_in: "0xC461F7B7C0C5a1732c4a97842bD0BC22aF160E53"
+    token_out: "0xa6537973DF1AE285922d79bc0058F08B721F4fE3"
+    slippage: 0.5
+  bsc-token1-token2-v2:
+    dex: uniswapv2
+    network: bsc
+    token_in: "0x34238E292e112542c6d7143b2f536579922C1aEb"
+    token_out: "0x2744884Ef9fF372863353b2E728694ed631E645a"
+    slippage: 0.5
+  arbitrum-token1-token2-v2:
+    dex: uniswapv2
+    network: arbitrum
+    token_in: "0xC316540F293726adaEF41093A32469D740D99aAc"
+    token_out: "0x1FeBd04F40A759c153Ee33672525269300Cd28f2"
+    slippage: 0.5

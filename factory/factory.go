@@ -2,25 +2,30 @@ package factory
 
 import (
 	"fmt"
+
+	"github.com/A1exit/dex-sdk/configs"
 	"github.com/A1exit/dex-sdk/dex"
 	"github.com/A1exit/dex-sdk/uniswapv2"
-
-	"github.com/A1exit/dex-sdk/config"
+	"github.com/A1exit/dex-sdk/uniswapv3"
 )
 
-func GetDex(cfg config.SDKConfig, dexType config.DexType, net config.Network) (dex.Dex, error) {
+func GetDex(dexType configs.DexType, net configs.Network) (dex.Dex, error) {
+	networksConfig, err := configs.LoadConfig()
+	if err != nil {
+		return nil, fmt.Errorf("load networks config: %w", err)
+	}
+
+	routerAddr, err := networksConfig.GetRouterAddress(net, dexType)
+	if err != nil {
+		return nil, fmt.Errorf("get router address: %w", err)
+	}
+
 	switch dexType {
-	case config.UniswapV2:
-		routerAddr, err := cfg.GetRouterAddress(dexType, net)
-		if err != nil {
-			return nil, fmt.Errorf("get router address: %w", err)
-		}
-		abiPath, err := cfg.GetABIPath(dexType)
-		if err != nil {
-			return nil, fmt.Errorf("get abi path: %w", err)
-		}
-		return uniswapv2.New(routerAddr, abiPath), nil
+	case configs.UniswapV2:
+		return uniswapv2.New(routerAddr), nil
+	case configs.UniswapV3:
+		return uniswapv3.New(routerAddr), nil
 	default:
-		return nil, fmt.Errorf("unsupported domain: %s", dexType)
+		return nil, fmt.Errorf("unsupported dex type: %s", dexType)
 	}
 }

@@ -3,21 +3,23 @@ package uniswapv2
 import (
 	"bytes"
 	"fmt"
-	"github.com/A1exit/dex-sdk/dex"
 	"math/big"
 	"os"
 
+	"github.com/A1exit/dex-sdk/dex"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 )
+
+const AbiPath = "uniswapv2/abi/UniswapV2Router.abi.json"
 
 type UniV2 struct {
 	routerAddress common.Address
 	abi           abi.ABI
 }
 
-func New(routerAddress common.Address, abiPath string) *UniV2 {
-	abiData, err := os.ReadFile(abiPath)
+func New(routerAddress common.Address) *UniV2 {
+	abiData, err := os.ReadFile(AbiPath)
 	if err != nil {
 		panic(fmt.Errorf("failed to read ABI file: %w", err))
 	}
@@ -40,17 +42,16 @@ func (u *UniV2) Name() string {
 func (u *UniV2) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
 	path := []common.Address{params.TokenIn, params.TokenOut}
 
-	slippage := big.NewInt(int64(params.Slippage * 10000))
-	one := big.NewInt(10000)
-	amountOutMin := new(big.Int).Mul(params.AmountIn, new(big.Int).Sub(one, slippage))
-	amountOutMin.Div(amountOutMin, one)
+	slippageMultiplier := big.NewInt(10000 - int64(params.Slippage*10000))
+	amountOutMin := new(big.Int).Mul(params.AmountIn, slippageMultiplier)
+	amountOutMin.Div(amountOutMin, big.NewInt(10000))
 
 	input, err := u.abi.Pack("swapExactTokensForTokens",
-		params.AmountIn,
-		amountOutMin,
-		path,
-		params.Recipient,
-		params.Deadline,
+		params.AmountIn,  // amountIn
+		amountOutMin,     // amountOutMin
+		path,             // path
+		params.Recipient, // to
+		params.Deadline,  // deadline
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to pack calldata: %w", err)
