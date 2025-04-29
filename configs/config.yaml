@@ -7,6 +7,7 @@ networks:
     routers:
       uniswapv2: "0x9a489505a00cE272eAa5e07Dba6491314CaE3796"
       uniswapv3: "0x1b81D678ffb9C0263b24A97847620C99d213eB14"
+      pancakev3: "0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E"
   arbitrum:
     routers:
       uniswapv2: "0x502c11C15BF18F3CCE7b5df54A8D85DdAAe35e2F"
@@ -39,7 +40,7 @@ pairs:
     slippage: 0.5
     fee: 3000
   bsc-token1-token2-v3:
-    dex: uniswapv3
+    dex: pancakev3
     network: bsc
     token_in: "0x34238E292e112542c6d7143b2f536579922C1aEb"
     token_out: "0x2744884Ef9fF372863353b2E728694ed631E645a"

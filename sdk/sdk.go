@@ -8,42 +8,36 @@ import (
 	"github.com/A1exit/dex-sdk/configs"
 	"github.com/A1exit/dex-sdk/dex"
 	"github.com/A1exit/dex-sdk/factory"
-
 	"github.com/ethereum/go-ethereum/common"
 )
 
 type SDK struct {
-	router dex.Router
 	config configs.Config
 }
 
-func New(dexType configs.DexType, network configs.Network) (*SDK, error) {
-	config, err := configs.LoadConfig()
+func New() (*SDK, error) {
+	cfg, err := configs.LoadDefaultConfig()
 	if err != nil {
 		return nil, fmt.Errorf("load config: %w", err)
 	}
 
-	r, err := factory.GetRouter(dexType, network)
-	if err != nil {
-		return nil, fmt.Errorf("get router: %w", err)
-	}
-
-	return &SDK{
-		router: r,
-		config: config,
-	}, nil
+	return &SDK{config: cfg}, nil
 }
 
-func (s *SDK) BuildSwap(pairID string, amountIn *big.Int, recipient string) ([]byte, error) {
-	if amountIn == nil || amountIn.Cmp(big.NewInt(0)) <= 0 {
-		return nil, fmt.Errorf("invalid amountIn: must be greater than 0")
-	}
-	pair, ok := s.config.Pairs[pairID]
-	if !ok {
-		return nil, fmt.Errorf("pair not found: %s", pairID)
+func (s *SDK) BuildSwap(pairID string, amountIn *big.Int, recipient string) ([]byte, common.Address, error) {
+	if amountIn == nil || amountIn.Sign() <= 0 {
+		return nil, common.Address{}, fmt.Errorf("amount must be greater than zero")
 	}
 	if !common.IsHexAddress(recipient) {
-		return nil, fmt.Errorf("invalid recipient: %s", recipient)
+		return nil, common.Address{}, fmt.Errorf("invalid recipient address: %s", recipient)
+	}
+	pair, err := s.config.GetPair(pairID)
+	if err != nil {
+		return nil, common.Address{}, fmt.Errorf("get pair: %w", err)
+	}
+	router, err := factory.GetDex(s.config, pair.Dex, pair.Network)
+	if err != nil {
+		return nil, common.Address{}, fmt.Errorf("get router: %w", err)
 	}
 	params := dex.SwapParams{
 		TokenIn:   common.HexToAddress(pair.TokenIn),
@@ -55,5 +49,15 @@ func (s *SDK) BuildSwap(pairID string, amountIn *big.Int, recipient string) ([]b
 		Deadline:  big.NewInt(time.Now().Add(10 * time.Minute).Unix()),
 	}
 
-	return s.router.BuildSwapCallData(params)
+	calldata, err := router.BuildSwapCallData(params)
+	if err != nil {
+		return nil, common.Address{}, fmt.Errorf("build calldata: %w", err)
+	}
+
+	routerAddr, err := s.config.GetRouterAddress(pair.Network, pair.Dex)
+	if err != nil {
+		return nil, common.Address{}, fmt.Errorf("get router address: %w", err)
+	}
+
+	return calldata, routerAddr, nil
 }

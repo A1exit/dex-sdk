@@ -1,4 +1,4 @@
-package uniswapv3
+package pancakev3
 
 import (
 	"bytes"
@@ -11,11 +11,11 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-const abiPath = "uniswapv3/abi/PancakeV3Router.abi.json"
+const abiPath = "pancakev3/abi/PancakeV3Router.abi.json"
 
-var _ dex.Router = (*UniV3)(nil)
+var _ dex.Router = (*PancakeV3)(nil)
 
-type UniV3 struct {
+type PancakeV3 struct {
 	routerAddress common.Address
 	abi           abi.ABI
 }
@@ -28,28 +28,26 @@ type ExactInputParams struct {
 	AmountOutMinimum *big.Int
 }
 
-func New(routerAddress common.Address) *UniV3 {
+func New(routerAddress common.Address) *PancakeV3 {
 	abiData, err := os.ReadFile(abiPath)
 	if err != nil {
 		panic(fmt.Errorf("failed to read ABI file: %w", err))
 	}
-
 	parsedABI, err := abi.JSON(bytes.NewReader(abiData))
 	if err != nil {
 		panic(fmt.Errorf("failed to parse ABI: %w", err))
 	}
-
-	return &UniV3{
+	return &PancakeV3{
 		routerAddress: routerAddress,
 		abi:           parsedABI,
 	}
 }
 
-func (u *UniV3) Name() string {
-	return "uniswapv3"
+func (p *PancakeV3) Name() string {
+	return "pancakev3"
 }
 
-func (u *UniV3) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
+func (p *PancakeV3) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
 	fee := uint32(3000)
 	if params.Fee != nil {
 		fee = *params.Fee
@@ -57,6 +55,7 @@ func (u *UniV3) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
 
 	path := encodePath(params.TokenIn, params.TokenOut, fee)
 	fmt.Println("path:", "0x"+common.Bytes2Hex(path))
+
 	payload := ExactInputParams{
 		Path:             path,
 		Recipient:        params.Recipient,
@@ -65,7 +64,7 @@ func (u *UniV3) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
 		AmountOutMinimum: calcAmountOutMin(params.AmountIn, params.Slippage),
 	}
 
-	input, err := u.abi.Pack("exactInput", payload)
+	input, err := p.abi.Pack("exactInput", payload)
 	if err != nil {
 		return nil, fmt.Errorf("failed to pack calldata: %w", err)
 	}

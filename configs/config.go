@@ -14,11 +14,11 @@ type Network string
 const (
 	UniswapV2 DexType = "uniswapv2"
 	UniswapV3 DexType = "uniswapv3"
-
-	Mainnet  Network = "mainnet"
-	Sepolia  Network = "sepolia"
-	BSC      Network = "bsc"
-	Arbitrum Network = "arbitrum"
+	PancakeV3 DexType = "pancakev3"
+	Mainnet   Network = "mainnet"
+	Sepolia   Network = "sepolia"
+	BSC       Network = "bsc"
+	Arbitrum  Network = "arbitrum"
 )
 
 type NetworkRouters struct {
@@ -39,14 +39,8 @@ type Config struct {
 	Pairs    map[string]PairConfig      `yaml:"pairs"`
 }
 
-var DefaultConfigPath = "configs/config.yaml"
-var cachedConfig *Config
-
-func LoadConfig() (Config, error) {
-	if cachedConfig != nil {
-		return *cachedConfig, nil
-	}
-	data, err := os.ReadFile(DefaultConfigPath)
+func LoadConfigFromFile(path string) (Config, error) {
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return Config{}, fmt.Errorf("read config yaml: %w", err)
 	}
@@ -54,8 +48,13 @@ func LoadConfig() (Config, error) {
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
 		return Config{}, fmt.Errorf("parse config yaml: %w", err)
 	}
-	cachedConfig = &cfg
 	return cfg, nil
+}
+
+const DefaultConfigPath = "configs/config.yaml"
+
+func LoadDefaultConfig() (Config, error) {
+	return LoadConfigFromFile(DefaultConfigPath)
 }
 
 func (cfg Config) GetRouterAddress(net Network, dex DexType) (common.Address, error) {

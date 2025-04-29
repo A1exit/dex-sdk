@@ -2,6 +2,7 @@ package factory
 
 import (
 	"fmt"
+	"github.com/A1exit/dex-sdk/pancakev3"
 
 	"github.com/A1exit/dex-sdk/configs"
 	"github.com/A1exit/dex-sdk/dex"
@@ -9,12 +10,7 @@ import (
 	"github.com/A1exit/dex-sdk/uniswapv3"
 )
 
-func GetRouter(dexType configs.DexType, net configs.Network) (dex.Router, error) {
-	config, err := configs.LoadConfig()
-	if err != nil {
-		return nil, fmt.Errorf("load config: %w", err)
-	}
-
+func GetDex(config configs.Config, dexType configs.DexType, net configs.Network) (dex.Router, error) {
 	routerAddr, err := config.GetRouterAddress(net, dexType)
 	if err != nil {
 		return nil, fmt.Errorf("get router address: %w", err)
@@ -25,6 +21,8 @@ func GetRouter(dexType configs.DexType, net configs.Network) (dex.Router, error)
 		return uniswapv2.New(routerAddr), nil
 	case configs.UniswapV3:
 		return uniswapv3.New(routerAddr), nil
+	case configs.PancakeV3:
+		return pancakev3.New(routerAddr), nil
 	default:
 		return nil, fmt.Errorf("unsupported dex type: %s", dexType)
 	}
