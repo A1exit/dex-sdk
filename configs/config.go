@@ -54,6 +54,7 @@ func LoadConfig() (Config, error) {
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
 		return Config{}, fmt.Errorf("parse config yaml: %w", err)
 	}
+	cachedConfig = &cfg
 	return cfg, nil
 }
 

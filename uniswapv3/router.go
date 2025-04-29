@@ -56,7 +56,7 @@ func (u *UniV3) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
 	}
 
 	path := encodePath(params.TokenIn, params.TokenOut, fee)
-
+	fmt.Println("path:", "0x"+common.Bytes2Hex(path))
 	payload := ExactInputParams{
 		Path:             path,
 		Recipient:        params.Recipient,

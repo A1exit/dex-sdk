@@ -34,19 +34,24 @@ func New(dexType configs.DexType, network configs.Network) (*SDK, error) {
 	}, nil
 }
 
-func (s *SDK) BuildSwap(pairID string, amountIn *big.Int, recipient common.Address) ([]byte, error) {
+func (s *SDK) BuildSwap(pairID string, amountIn *big.Int, recipient string) ([]byte, error) {
+	if amountIn == nil || amountIn.Cmp(big.NewInt(0)) <= 0 {
+		return nil, fmt.Errorf("invalid amountIn: must be greater than 0")
+	}
 	pair, ok := s.config.Pairs[pairID]
 	if !ok {
 		return nil, fmt.Errorf("pair not found: %s", pairID)
 	}
-
+	if !common.IsHexAddress(recipient) {
+		return nil, fmt.Errorf("invalid recipient: %s", recipient)
+	}
 	params := dex.SwapParams{
 		TokenIn:   common.HexToAddress(pair.TokenIn),
 		TokenOut:  common.HexToAddress(pair.TokenOut),
 		AmountIn:  amountIn,
 		Slippage:  pair.Slippage,
 		Fee:       pair.Fee,
-		Recipient: recipient,
+		Recipient: common.HexToAddress(recipient),
 		Deadline:  big.NewInt(time.Now().Add(10 * time.Minute).Unix()),
 	}
 
