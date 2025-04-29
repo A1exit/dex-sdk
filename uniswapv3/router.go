@@ -20,6 +20,14 @@ type UniV3 struct {
 	abi           abi.ABI
 }
 
+type ExactInputParams struct {
+	Path             []byte
+	Recipient        common.Address
+	Deadline         *big.Int
+	AmountIn         *big.Int
+	AmountOutMinimum *big.Int
+}
+
 func New(routerAddress common.Address) *UniV3 {
 	abiData, err := os.ReadFile(abiPath)
 	if err != nil {
@@ -42,19 +50,19 @@ func (u *UniV3) Name() string {
 }
 
 func (u *UniV3) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
-	fee := uint32(3000) // default
+	fee := uint32(3000)
 	if params.Fee != nil {
 		fee = *params.Fee
 	}
 
 	path := encodePath(params.TokenIn, params.TokenOut, fee)
 
-	payload := map[string]interface{}{
-		"path":             path,
-		"recipient":        params.Recipient,
-		"deadline":         params.Deadline,
-		"amountIn":         params.AmountIn,
-		"amountOutMinimum": calcAmountOutMin(params.AmountIn, params.Slippage),
+	payload := ExactInputParams{
+		Path:             path,
+		Recipient:        params.Recipient,
+		Deadline:         params.Deadline,
+		AmountIn:         params.AmountIn,
+		AmountOutMinimum: calcAmountOutMin(params.AmountIn, params.Slippage),
 	}
 
 	input, err := u.abi.Pack("exactInput", payload)
