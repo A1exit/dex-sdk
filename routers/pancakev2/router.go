@@ -4,14 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"math/big"
-	"os"
 
 	"github.com/A1exit/dex-sdk/dex"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 )
-
-const abiPath = "routers/pancakev2/abi/PancakeV2Router.abi.json"
 
 var _ dex.Router = (*PancakeV2)(nil)
 
@@ -20,12 +17,25 @@ type PancakeV2 struct {
 	abi           abi.ABI
 }
 
+// swapExactTokensForTokensABI defines the ABI for the swapExactTokensForTokens method
+const swapExactTokensForTokensABI = `[{
+	"inputs": [
+		{"internalType": "uint256", "name": "amountIn", "type": "uint256"},
+		{"internalType": "uint256", "name": "amountOutMin", "type": "uint256"},
+		{"internalType": "address[]", "name": "path", "type": "address[]"},
+		{"internalType": "address", "name": "to", "type": "address"},
+		{"internalType": "uint256", "name": "deadline", "type": "uint256"}
+	],
+	"name": "swapExactTokensForTokens",
+	"outputs": [
+		{"internalType": "uint256[]", "name": "amounts", "type": "uint256[]"}
+	],
+	"stateMutability": "nonpayable",
+	"type": "function"
+}]`
+
 func New(routerAddress common.Address) (*PancakeV2, error) {
-	abiData, err := os.ReadFile(abiPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read ABI file: %w", err)
-	}
-	parsedABI, err := abi.JSON(bytes.NewReader(abiData))
+	parsedABI, err := abi.JSON(bytes.NewReader([]byte(swapExactTokensForTokensABI)))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse ABI: %w", err)
 	}

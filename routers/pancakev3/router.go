@@ -4,14 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"math/big"
-	"os"
 
 	"github.com/A1exit/dex-sdk/dex"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 )
-
-const abiPath = "routers/pancakev3/abi/PancakeV3Router.abi.json"
 
 var _ dex.Router = (*PancakeV3)(nil)
 
@@ -28,12 +25,30 @@ type ExactInputParams struct {
 	AmountOutMinimum *big.Int
 }
 
+// exactInputABI defines the ABI for the exactInput method
+const exactInputABI = `[{
+	"inputs": [{
+		"components": [
+			{"internalType": "bytes", "name": "path", "type": "bytes"},
+			{"internalType": "address", "name": "recipient", "type": "address"},
+			{"internalType": "uint256", "name": "deadline", "type": "uint256"},
+			{"internalType": "uint256", "name": "amountIn", "type": "uint256"},
+			{"internalType": "uint256", "name": "amountOutMinimum", "type": "uint256"}
+		],
+		"internalType": "struct ISwapRouter.ExactInputParams",
+		"name": "params",
+		"type": "tuple"
+	}],
+	"name": "exactInput",
+	"outputs": [
+		{"internalType": "uint256", "name": "amountOut", "type": "uint256"}
+	],
+	"stateMutability": "payable",
+	"type": "function"
+}]`
+
 func New(routerAddress common.Address) (*PancakeV3, error) {
-	abiData, err := os.ReadFile(abiPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read ABI file: %w", err)
-	}
-	parsedABI, err := abi.JSON(bytes.NewReader(abiData))
+	parsedABI, err := abi.JSON(bytes.NewReader([]byte(exactInputABI)))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse ABI: %w", err)
 	}
