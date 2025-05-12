@@ -2,12 +2,14 @@ package factory
 
 import (
 	"fmt"
-	"github.com/A1exit/dex-sdk/pancakev3"
+
+	"github.com/A1exit/dex-sdk/routers/pancakev3"
 
 	"github.com/A1exit/dex-sdk/configs"
 	"github.com/A1exit/dex-sdk/dex"
-	"github.com/A1exit/dex-sdk/uniswapv2"
-	"github.com/A1exit/dex-sdk/uniswapv3"
+	"github.com/A1exit/dex-sdk/routers/pancakev2"
+	"github.com/A1exit/dex-sdk/routers/uniswapv2"
+	"github.com/A1exit/dex-sdk/routers/uniswapv3"
 )
 
 func GetDex(config configs.Config, dexType configs.DexType, net configs.Network) (dex.Router, error) {
@@ -16,14 +18,23 @@ func GetDex(config configs.Config, dexType configs.DexType, net configs.Network)
 		return nil, fmt.Errorf("get router address: %w", err)
 	}
 
+	var router dex.Router
 	switch dexType {
 	case configs.UniswapV2:
-		return uniswapv2.New(routerAddr), nil
+		router, err = uniswapv2.New(routerAddr)
 	case configs.UniswapV3:
-		return uniswapv3.New(routerAddr), nil
+		router, err = uniswapv3.New(routerAddr)
 	case configs.PancakeV3:
-		return pancakev3.New(routerAddr), nil
+		router, err = pancakev3.New(routerAddr)
+	case configs.PancakeV2:
+		router, err = pancakev2.New(routerAddr)
 	default:
 		return nil, fmt.Errorf("unsupported dex type: %s", dexType)
 	}
+
+	if err != nil {
+		return nil, fmt.Errorf("create %s router: %w", dexType, err)
+	}
+
+	return router, nil
 }

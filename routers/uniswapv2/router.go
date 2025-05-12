@@ -11,7 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-const AbiPath = "uniswapv2/abi/UniswapV2Router.abi.json"
+const AbiPath = "routers/uniswapv2/abi/UniswapV2Router.abi.json"
 
 var _ dex.Router = (*UniV2)(nil)
 
@@ -20,21 +20,21 @@ type UniV2 struct {
 	abi           abi.ABI
 }
 
-func New(routerAddress common.Address) *UniV2 {
+func New(routerAddress common.Address) (*UniV2, error) {
 	abiData, err := os.ReadFile(AbiPath)
 	if err != nil {
-		panic(fmt.Errorf("failed to read ABI file: %w", err))
+		return nil, fmt.Errorf("failed to read ABI file: %w", err)
 	}
 
 	parsedABI, err := abi.JSON(bytes.NewReader(abiData))
 	if err != nil {
-		panic(fmt.Errorf("failed to parse ABI: %w", err))
+		return nil, fmt.Errorf("failed to parse ABI: %w", err)
 	}
 
 	return &UniV2{
 		routerAddress: routerAddress,
 		abi:           parsedABI,
-	}
+	}, nil
 }
 
 func (u *UniV2) Name() string {

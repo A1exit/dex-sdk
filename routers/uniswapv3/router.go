@@ -11,7 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-const abiPath = "uniswapv3/abi/PancakeV3Router.abi.json"
+const abiPath = "routers/uniswapv3/abi/UniswapV3Router.abi.json"
 
 var _ dex.Router = (*UniV3)(nil)
 
@@ -28,21 +28,21 @@ type ExactInputParams struct {
 	AmountOutMinimum *big.Int
 }
 
-func New(routerAddress common.Address) *UniV3 {
+func New(routerAddress common.Address) (*UniV3, error) {
 	abiData, err := os.ReadFile(abiPath)
 	if err != nil {
-		panic(fmt.Errorf("failed to read ABI file: %w", err))
+		return nil, fmt.Errorf("failed to read ABI file: %w", err)
 	}
 
 	parsedABI, err := abi.JSON(bytes.NewReader(abiData))
 	if err != nil {
-		panic(fmt.Errorf("failed to parse ABI: %w", err))
+		return nil, fmt.Errorf("failed to parse ABI: %w", err)
 	}
 
 	return &UniV3{
 		routerAddress: routerAddress,
 		abi:           parsedABI,
-	}
+	}, nil
 }
 
 func (u *UniV3) Name() string {
