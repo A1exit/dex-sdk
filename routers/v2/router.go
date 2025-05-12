@@ -1,4 +1,4 @@
-package uniswapv2
+package v2
 
 import (
 	"bytes"
@@ -10,9 +10,9 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-var _ dex.Router = (*UniV2)(nil)
+var _ dex.Router = (*V2Router)(nil)
 
-type UniV2 struct {
+type V2Router struct {
 	routerAddress common.Address
 	abi           abi.ABI
 }
@@ -34,33 +34,25 @@ const swapExactTokensForTokensABI = `[{
 	"type": "function"
 }]`
 
-func New(routerAddress common.Address) (*UniV2, error) {
+func New(routerAddress common.Address) (*V2Router, error) {
 	parsedABI, err := abi.JSON(bytes.NewReader([]byte(swapExactTokensForTokensABI)))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse ABI: %w", err)
 	}
-	return &UniV2{
+	return &V2Router{
 		routerAddress: routerAddress,
 		abi:           parsedABI,
 	}, nil
 }
 
-func (u *UniV2) Name() string {
-	return "uniswapv2"
-}
-
-func (u *UniV2) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
+func (v *V2Router) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
 	_ = params.Fee
 
 	path := []common.Address{params.TokenIn, params.TokenOut}
 
-	slippageMultiplier := big.NewInt(10000 - int64(params.Slippage*10000))
-	amountOutMin := new(big.Int).Mul(params.AmountIn, slippageMultiplier)
-	amountOutMin.Div(amountOutMin, big.NewInt(10000))
-
-	input, err := u.abi.Pack("swapExactTokensForTokens",
+	input, err := v.abi.Pack("swapExactTokensForTokens",
 		params.AmountIn,
-		amountOutMin,
+		big.NewInt(0),
 		path,
 		params.Recipient,
 		params.Deadline,

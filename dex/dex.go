@@ -7,7 +7,6 @@ import (
 )
 
 type Router interface {
-	Name() string
 	BuildSwapCallData(params SwapParams) ([]byte, error)
 }
 

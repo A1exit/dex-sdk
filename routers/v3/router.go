@@ -1,4 +1,4 @@
-package pancakev3
+package v3
 
 import (
 	"bytes"
@@ -10,19 +10,11 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-var _ dex.Router = (*PancakeV3)(nil)
+var _ dex.Router = (*V3Router)(nil)
 
-type PancakeV3 struct {
+type V3Router struct {
 	routerAddress common.Address
 	abi           abi.ABI
-}
-
-type ExactInputParams struct {
-	Path             []byte
-	Recipient        common.Address
-	Deadline         *big.Int
-	AmountIn         *big.Int
-	AmountOutMinimum *big.Int
 }
 
 // exactInputABI defines the ABI for the exactInput method
@@ -47,22 +39,18 @@ const exactInputABI = `[{
 	"type": "function"
 }]`
 
-func New(routerAddress common.Address) (*PancakeV3, error) {
+func New(routerAddress common.Address) (*V3Router, error) {
 	parsedABI, err := abi.JSON(bytes.NewReader([]byte(exactInputABI)))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse ABI: %w", err)
 	}
-	return &PancakeV3{
+	return &V3Router{
 		routerAddress: routerAddress,
 		abi:           parsedABI,
 	}, nil
 }
 
-func (p *PancakeV3) Name() string {
-	return "pancakev3"
-}
-
-func (p *PancakeV3) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
+func (v *V3Router) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
 	fee := uint32(3000)
 	if params.Fee != nil {
 		fee = *params.Fee
@@ -71,15 +59,24 @@ func (p *PancakeV3) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
 	path := encodePath(params.TokenIn, params.TokenOut, fee)
 	fmt.Println("path:", "0x"+common.Bytes2Hex(path))
 
-	payload := ExactInputParams{
+	amountOutMin := big.NewInt(0)
+
+	// Create the params struct
+	swapParams := struct {
+		Path             []byte
+		Recipient        common.Address
+		Deadline         *big.Int
+		AmountIn         *big.Int
+		AmountOutMinimum *big.Int
+	}{
 		Path:             path,
 		Recipient:        params.Recipient,
 		Deadline:         params.Deadline,
 		AmountIn:         params.AmountIn,
-		AmountOutMinimum: calcAmountOutMin(params.AmountIn, params.Slippage),
+		AmountOutMinimum: amountOutMin,
 	}
 
-	input, err := p.abi.Pack("exactInput", payload)
+	input, err := v.abi.Pack("exactInput", swapParams)
 	if err != nil {
 		return nil, fmt.Errorf("failed to pack calldata: %w", err)
 	}
@@ -97,14 +94,4 @@ func encodePath(tokenIn, tokenOut common.Address, fee uint32) []byte {
 
 func uint24ToBytes(v uint32) []byte {
 	return []byte{byte(v >> 16), byte(v >> 8), byte(v)}
-}
-
-func calcAmountOutMin(amountIn *big.Int, slippage float64) *big.Int {
-	slippageFactor := big.NewFloat(1.0 - slippage/100)
-	amount := new(big.Float).SetInt(amountIn)
-	amount.Mul(amount, slippageFactor)
-
-	result := new(big.Int)
-	amount.Int(result)
-	return result
 }
