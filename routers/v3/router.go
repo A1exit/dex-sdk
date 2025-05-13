@@ -17,7 +17,6 @@ type V3Router struct {
 	abi           abi.ABI
 }
 
-// exactInputABI defines the ABI for the exactInput method
 const exactInputABI = `[{
 	"inputs": [{
 		"components": [
@@ -38,6 +37,30 @@ const exactInputABI = `[{
 	"stateMutability": "payable",
 	"type": "function"
 }]`
+
+const executeABI = `[{
+        "inputs": [
+            {
+                "internalType": "bytes",
+                "name": "commands",
+                "type": "bytes"
+            },
+            {
+                "internalType": "bytes[]",
+                "name": "inputs",
+                "type": "bytes[]"
+            },
+            {
+                "internalType": "uint256",
+                "name": "deadline",
+                "type": "uint256"
+            }
+        ],
+        "name": "execute",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    }]`
 
 func New(routerAddress common.Address) (*V3Router, error) {
 	parsedABI, err := abi.JSON(bytes.NewReader([]byte(exactInputABI)))
@@ -61,7 +84,6 @@ func (v *V3Router) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
 
 	amountOutMin := big.NewInt(0)
 
-	// Create the params struct
 	swapParams := struct {
 		Path             []byte
 		Recipient        common.Address

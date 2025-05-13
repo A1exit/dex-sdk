@@ -3,14 +3,17 @@ networks:
     routers: # v2 approve, v3 approve
       uniswapv2: "0xeE567Fe1712Faf6149d80dA1E6934E354124CfE3"
       uniswapv3: "0xbf99719a9Ad0303af8B518C87294d2aEf5EBcAEe"
+    wrapped_native: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
   bsc: # approve
     routers:
       pancakev2: "0xD99D1c33F9fC3444f8101754aBC46c52416550D1"
       pancakev3: "0x1b81D678ffb9C0263b24A97847620C99d213eB14"
+    wrapped_native: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd"
   arbitrum:
     routers: # approve, mainnet check sushiswap github
       uniswapv2: "0x502c11C15BF18F3CCE7b5df54A8D85DdAAe35e2F"
       pancakev3: "0xFb220870a3CFe709d8ff853af004d806055d4c31"
+    wrapped_native: "0x2836ae2eA2c013acD38028fD0C77B92cccFa2EE4"
 
 pairs:
   sepolia-token1-token2-v2:
@@ -25,17 +28,47 @@ pairs:
     token_in: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
     token_out: "0xa6537973DF1AE285922d79bc0058F08B721F4fE3"
     slippage: 0.5
+  sepolia-token1-ethv2:
+    dex: uniswapv2
+    network: sepolia
+    token_in: "0xa6537973DF1AE285922d79bc0058F08B721F4fE3"
+    token_out: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
+    slippage: 0.5
   bsc-token1-token2-v2:
     dex: pancakev2
     network: bsc
     token_in: "0x34238E292e112542c6d7143b2f536579922C1aEb"
     token_out: "0x2744884Ef9fF372863353b2E728694ed631E645a"
     slippage: 0.5
+  bsc-eth-token2-v2:
+    dex: pancakev2
+    network: bsc
+    token_in: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
+    token_out: "0x2744884Ef9fF372863353b2E728694ed631E645a"
+    slippage: 0.5
+  bsc-token2-eth-v2:
+    dex: pancakev2
+    network: bsc
+    token_in: "0x2744884Ef9fF372863353b2E728694ed631E645a"
+    token_out: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
+    slippage: 0.5
   arbitrum-token1-token2-v2:
     dex: uniswapv2
     network: arbitrum
     token_in: "0xC316540F293726adaEF41093A32469D740D99aAc"
     token_out: "0x1FeBd04F40A759c153Ee33672525269300Cd28f2"
+    slippage: 0.5
+  arbitrum-eth-token2-v2:
+    dex: uniswapv2
+    network: arbitrum
+    token_in: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
+    token_out: "0xC316540F293726adaEF41093A32469D740D99aAc"
+    slippage: 0.5
+  arbitrum-token2-eth-v2:
+    dex: uniswapv2
+    network: arbitrum
+    token_in: "0xC316540F293726adaEF41093A32469D740D99aAc"
+    token_out: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
     slippage: 0.5
   sepolia-token1-token2-v3:
     dex: uniswapv3

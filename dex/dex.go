@@ -18,4 +18,5 @@ type SwapParams struct {
 	Fee       *uint32
 	Recipient common.Address
 	Deadline  *big.Int
+	WrappedNative common.Address
 }

@@ -14,52 +14,66 @@ var _ dex.Router = (*V2Router)(nil)
 
 type V2Router struct {
 	routerAddress common.Address
-	abi           abi.ABI
 }
 
-// swapExactTokensForTokensABI defines the ABI for the swapExactTokensForTokens method
-const swapExactTokensForTokensABI = `[{
-	"inputs": [
-		{"internalType": "uint256", "name": "amountIn", "type": "uint256"},
-		{"internalType": "uint256", "name": "amountOutMin", "type": "uint256"},
-		{"internalType": "address[]", "name": "path", "type": "address[]"},
-		{"internalType": "address", "name": "to", "type": "address"},
-		{"internalType": "uint256", "name": "deadline", "type": "uint256"}
-	],
-	"name": "swapExactTokensForTokens",
-	"outputs": [
-		{"internalType": "uint256[]", "name": "amounts", "type": "uint256[]"}
-	],
-	"stateMutability": "nonpayable",
-	"type": "function"
-}]`
-
 func New(routerAddress common.Address) (*V2Router, error) {
-	parsedABI, err := abi.JSON(bytes.NewReader([]byte(swapExactTokensForTokensABI)))
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse ABI: %w", err)
-	}
 	return &V2Router{
 		routerAddress: routerAddress,
-		abi:           parsedABI,
 	}, nil
 }
 
 func (v *V2Router) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
 	_ = params.Fee
 
-	path := []common.Address{params.TokenIn, params.TokenOut}
+	var parsedABI abi.ABI
+	var err error
+	var input []byte
 
-	input, err := v.abi.Pack("swapExactTokensForTokens",
-		params.AmountIn,
-		big.NewInt(0),
-		path,
-		params.Recipient,
-		params.Deadline,
-	)
+	switch {
+	case params.TokenIn == common.HexToAddress("0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"):
+		parsedABI, err = abi.JSON(bytes.NewReader([]byte(swapExactETHForTokensABI)))
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse ETH swap ABI: %w", err)
+		}
+		path := []common.Address{params.WrappedNative, params.TokenOut}
+		input, err = parsedABI.Pack(
+			"swapExactETHForTokens",
+			big.NewInt(0),
+			path,
+			params.Recipient,
+			params.Deadline,
+		)
+
+	case params.TokenOut == common.HexToAddress("0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"):
+		parsedABI, err = abi.JSON(bytes.NewReader([]byte(SwapExactTokensForETHABI)))
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse ETH swap ABI: %w", err)
+		}
+		path := []common.Address{params.TokenIn, params.WrappedNative}
+		input, err = parsedABI.Pack(
+			"swapExactTokensForETH",
+			params.AmountIn,
+			big.NewInt(0),
+			path,
+			params.Recipient,
+			params.Deadline,
+		)
+
+	default:
+		parsedABI, err = abi.JSON(bytes.NewReader([]byte(swapExactTokensForTokensABI)))
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse token swap ABI: %w", err)
+		}
+		path := []common.Address{params.TokenIn, params.TokenOut}
+		input, err = parsedABI.Pack("swapExactTokensForTokens",
+			params.AmountIn,
+			big.NewInt(0),
+			path,
+			params.Recipient,
+			params.Deadline)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to pack calldata: %w", err)
 	}
-
 	return input, nil
 }

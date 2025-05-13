@@ -14,7 +14,6 @@ func GetDex(config configs.Config, dexType configs.DexType, net configs.Network)
 	if err != nil {
 		return nil, fmt.Errorf("get router address: %w", err)
 	}
-
 	var router dex.Router
 	switch dexType {
 	case configs.UniswapV2, configs.PancakeV2:

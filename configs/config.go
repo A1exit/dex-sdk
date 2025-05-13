@@ -23,7 +23,8 @@ const (
 )
 
 type NetworkRouters struct {
-	Routers map[DexType]string `yaml:"routers"`
+	Routers       map[DexType]string `yaml:"routers"`
+	WrappedNative string             `yaml:"wrapped_native"`
 }
 
 type PairConfig struct {
@@ -76,4 +77,15 @@ func (cfg Config) GetPair(pairID string) (PairConfig, error) {
 		return PairConfig{}, fmt.Errorf("pair not found: %s", pairID)
 	}
 	return pair, nil
+}
+
+func (cfg Config) GetWrappedNativeToken(net Network) (common.Address, error) {
+	netCfg, ok := cfg.Networks[net]
+	if !ok {
+		return common.Address{}, fmt.Errorf("network not found: %s", net)
+	}
+	if netCfg.WrappedNative == "" {
+		return common.Address{}, fmt.Errorf("wrapped native token not found for network: %s", net)
+	}
+	return common.HexToAddress(netCfg.WrappedNative), nil
 }
