@@ -30,7 +30,7 @@ func (v *V2Router) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
 	var input []byte
 
 	switch {
-	case params.TokenIn == common.HexToAddress("0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"):
+	case params.TokenIn == dex.NativeTokenAddress:
 		parsedABI, err = abi.JSON(bytes.NewReader([]byte(swapExactETHForTokensABI)))
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse ETH swap ABI: %w", err)
@@ -44,7 +44,7 @@ func (v *V2Router) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
 			params.Deadline,
 		)
 
-	case params.TokenOut == common.HexToAddress("0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"):
+	case params.TokenOut == dex.NativeTokenAddress:
 		parsedABI, err = abi.JSON(bytes.NewReader([]byte(SwapExactTokensForETHABI)))
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse ETH swap ABI: %w", err)

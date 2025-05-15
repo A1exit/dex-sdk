@@ -11,12 +11,14 @@ type Router interface {
 }
 
 type SwapParams struct {
-	TokenIn   common.Address
-	TokenOut  common.Address
-	AmountIn  *big.Int
-	Slippage  float64
-	Fee       *uint32
-	Recipient common.Address
-	Deadline  *big.Int
+	TokenIn       common.Address
+	TokenOut      common.Address
+	AmountIn      *big.Int
+	Slippage      float64
+	Fee           *uint32
+	Recipient     common.Address
+	Deadline      *big.Int
 	WrappedNative common.Address
 }
+
+var NativeTokenAddress = common.HexToAddress("0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE")
