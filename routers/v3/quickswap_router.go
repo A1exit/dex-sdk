@@ -10,19 +10,19 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-var _ dex.Router = (*V3Router)(nil)
+var _ dex.Router = (*QuickSwapRouter)(nil)
 
-type V3Router struct {
+type QuickSwapRouter struct {
 	routerAddress common.Address
 }
 
-func New(routerAddress common.Address) (*V3Router, error) {
-	return &V3Router{
+func NewQuickSwapRouter(routerAddress common.Address) (*QuickSwapRouter, error) {
+	return &QuickSwapRouter{
 		routerAddress: routerAddress,
 	}, nil
 }
 
-func (v *V3Router) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
+func (v *QuickSwapRouter) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
 	var input []byte
 	var err error
 	var parsedABI abi.ABI
@@ -59,13 +59,13 @@ func (v *V3Router) BuildSwapCallData(params dex.SwapParams) ([]byte, error) {
 	if tokenOut != params.WrappedNative {
 		return input, nil
 	} else {
-		unwrapABI, err := abi.JSON(bytes.NewReader([]byte(unwrapWETH9ABI)))
+		unwrapABI, err := abi.JSON(bytes.NewReader([]byte(unwrapWNativeTokenABI)))
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse unwrapWETH9 ABI: %w", err)
+			return nil, fmt.Errorf("failed to parse unwrapWNativeToken ABI: %w", err)
 		}
-		unwrapInput, err := unwrapABI.Pack("unwrapWETH9", amountOutMin, params.Recipient)
+		unwrapInput, err := unwrapABI.Pack("unwrapWNativeToken", amountOutMin, params.Recipient)
 		if err != nil {
-			return nil, fmt.Errorf("failed to pack unwrapWETH9 calldata: %w", err)
+			return nil, fmt.Errorf("failed to pack unwrapWNativeToken calldata: %w", err)
 		}
 		multicallABI, err := abi.JSON(bytes.NewReader([]byte(multicallABI)))
 		if err != nil {

@@ -43,3 +43,14 @@ const unwrapWETH9ABI = `[{
 	"stateMutability": "payable", 
 	"type": "function"
 }]`
+
+const unwrapWNativeTokenABI = `[{
+	"inputs": [
+		{"internalType": "uint256", "name": "amountMinimum", "type": "uint256"},
+		{"internalType": "address", "name": "recipient", "type": "address"}
+	],
+	"name": "unwrapWNativeToken",
+	"outputs": [],
+	"stateMutability": "payable", 
+	"type": "function"
+}]`

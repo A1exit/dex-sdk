@@ -20,6 +20,8 @@ func GetDex(config configs.Config, dexType configs.DexType, net configs.Network)
 		router, err = v2.New(routerAddr)
 	case configs.UniswapV3, configs.PancakeV3:
 		router, err = v3.New(routerAddr)
+	case configs.QuickSwapV3:
+		router, err = v3.NewQuickSwapRouter(routerAddr)
 	default:
 		return nil, fmt.Errorf("unsupported dex type: %s", dexType)
 	}

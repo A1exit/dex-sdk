@@ -12,14 +12,15 @@ type DexType string
 type Network string
 
 const (
-	UniswapV2 DexType = "uniswapv2"
-	UniswapV3 DexType = "uniswapv3"
-	PancakeV3 DexType = "pancakev3"
-	PancakeV2 DexType = "pancakev2"
-	Mainnet   Network = "mainnet"
-	Sepolia   Network = "sepolia"
-	BSC       Network = "bsc"
-	Arbitrum  Network = "arbitrum"
+	UniswapV2   DexType = "uniswapv2"
+	UniswapV3   DexType = "uniswapv3"
+	PancakeV3   DexType = "pancakev3"
+	PancakeV2   DexType = "pancakev2"
+	QuickSwapV3 DexType = "quickswapv3"
+	Sepolia     Network = "sepolia"
+	BSC         Network = "bsc"
+	Arbitrum    Network = "arbitrum"
+	Polygon     Network = "polygon"
 )
 
 type NetworkRouters struct {
